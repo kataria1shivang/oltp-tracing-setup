@@ -22,7 +22,10 @@
     "express": "^4.17.3",
     "node-fetch": "^2.6.7",
     "nodemon": "^2.0.20",
+    "prom-client": "^15.1.0",
     "request": "^2.88.2",
-    "wiki-infobox-parser": "^0.1.11"
+    "wiki-infobox-parser": "^0.1.11",
+    "winston": "^3.11.0",
+    "winston-loki": "^6.0.8"
   }
 }
