@@ -2,13 +2,10 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'nodejs_application'
-    static_configs:
-      - targets: ['localhost:5000'] 
   - job_name: pm2-metrics
     scrape_interval: 10s
     scrape_timeout: 10s
     metrics_path: /metrics
     scheme: http
     static_configs:
-      - targets: ['localhost:9209']
+      - targets: ['host.docker.internal:9209']

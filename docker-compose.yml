@@ -1,18 +1,73 @@
-version: '3'
+version: '3.8'
 services:
-  grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
-    depends_on:
-      - loki
-    environment:
-      - GF_DATASOURCES_DEFAULT_URL=http://loki:3100
-
   loki:
     image: grafana/loki:latest
     ports:
-      - "3100:3100"
+      - "3101:3101"
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yaml
-    command: -config.file=/etc/loki/local-config.yaml
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml  # Bind mount for configuration file
+    command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
+    networks:
+      - my_network
+    
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=48h'
+    networks:
+      - my_network
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - my_network
+
+  alertmanager:
+    image: prom/alertmanager
+    volumes:
+      - ./alertmanager/config.yml:/etc/alertmanager/config.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - my_network
+
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - "3100:3100"  # Existing port for querying traces
+      - "4317:4317"  # OTLP gRPC receiver
+      - "4318:4318"  # OTLP HTTP receiver
+    volumes:
+      - ./tempo/tempo-config.yml:/etc/tempo/tempo.yaml
+    command: 
+      - '-config.file=/etc/tempo/tempo.yaml'
+    networks:
+      - my_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - loki
+      - prometheus
+      - grafana
+
+networks:
+  my_network:
+    driver: bridge
