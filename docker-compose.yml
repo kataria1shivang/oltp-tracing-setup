@@ -47,27 +47,35 @@ services:
   tempo:
     image: grafana/tempo:latest
     ports:
-      - "3100:3100"  # Existing port for querying traces
-      - "4317:4317"  # OTLP gRPC receiver
-      - "4318:4318"  # OTLP HTTP receiver
+      - "3200:3200"  
+      - "4317:4317"  
+      - "4318:4318"  
     volumes:
       - ./tempo/tempo-config.yml:/etc/tempo/tempo.yaml
+      - tempo-traces:/tmp/tempo/traces
+      - tempo-wal:/tmp/tempo/wal
     command: 
       - '-config.file=/etc/tempo/tempo.yaml'
     networks:
       - my_network
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-    depends_on:
-      - loki
-      - prometheus
-      - grafana
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx:/etc/nginx/conf.d
+  #   depends_on:
+  #     - loki
+  #     - prometheus
+  #     - grafana
 
 networks:
   my_network:
     driver: bridge
+
+volumes:
+  tempo-traces:
+    name: tempo-traces
+  tempo-wal:
+    name: tempo-wal

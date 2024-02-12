@@ -14,7 +14,7 @@ datasources:
 - name: Tempo
   type: tempo
   access: proxy
-  url: http://tempo:3100  # Use the appropriate URL for your Tempo instance
+  url: http://tempo:3200  # Use the appropriate URL for your Tempo instance
   editable: false
   jsonData:
     httpMethod: GET
