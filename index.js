@@ -2,22 +2,17 @@ const express = require('express');
 const app = express();
 const request = require('request');
 const wikip = require('wiki-infobox-parser');
-const { trace } = require('@opentelemetry/api');
+require('./tracing'); 
+const log = require('./tracelogger'); 
 
-// ejs
 app.set("view engine", 'ejs');
 
-// Ensure OpenTelemetry is initialized at the start
-require('./tracing');
-
-// routes
 app.get('/', (req, res) => {
     res.render('index');
 });
 
 app.get('/index', (req, response) => {
-    const tracer = trace.getTracer('express-server');
-    const span = tracer.startSpan('wikipedia_search');
+    log.info('Wikipedia search initiated.');
 
     let url = "https://en.wikipedia.org/w/api.php";
     let params = {
@@ -28,53 +23,36 @@ app.get('/index', (req, response) => {
         format: "json"
     };
 
-    url = url + "?";
-    Object.keys(params).forEach((key) => {
-        url += '&' + key + '=' + params[key];
-    });
+    url += "?" + Object.keys(params).map(key => `${key}=${encodeURIComponent(params[key])}`).join('&');
 
-    // Span for Wikipedia API Request
-    const requestSpan = tracer.startSpan('wikipedia_api_request', {
-        parent: span,
-    });
-
-    // Get Wikipedia search string
     request(url, (err, res, body) => {
-        requestSpan.end(); // End the request span as soon as the request completes
-
         if (err) {
-            span.recordException(err);
-            span.end();
+            log.error(`Error during Wikipedia API request: ${err.message}`);
             response.redirect('404');
             return;
         }
         
-        let result = JSON.parse(body);
-        let x = result[3][0];
-        x = x.substring(30, x.length);
-        
-        // Span for Parsing Wikipedia Data
-        const parsingSpan = tracer.startSpan('parse_wikipedia_data', {
-            parent: span,
-        });
+        let result;
+        try {
+            result = JSON.parse(body);
+        } catch (parseError) {
+            log.error(`Error parsing Wikipedia response: ${parseError.message}`);
+            response.redirect('404');
+            return;
+        }
 
-        // Get Wikipedia JSON
-        wikip(x, (err, final) => {
-            parsingSpan.end(); // End the parsing span as soon as parsing completes
+        let pageName = result[3][0]?.substring(30) || '';
 
+        wikip(pageName, (err, final) => {
             if (err) {
-                span.recordException(err);
-                span.end();
+                log.error(`Error parsing Wikipedia data: ${err.message}`);
                 response.redirect('404');
                 return;
             }
 
-            const answers = final;
-            span.end(); // Ensure the overall span ends after the request is completely processed
-            response.send(answers);
+            response.send(final);
         });
     });
 });
 
-// port
-app.listen(5000, () => console.log("Listening at port 5000..."));
+app.listen(5000, () => log.info("Server listening at port 5000..."));

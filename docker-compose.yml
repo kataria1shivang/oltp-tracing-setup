@@ -5,7 +5,7 @@ services:
     ports:
       - "3101:3101"
     volumes:
-      - ./loki/loki-config.yml:/etc/loki/local-config.yaml  # Bind mount for configuration file
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml 
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     networks:
       - my_network
@@ -24,7 +24,7 @@ services:
       - my_network
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.3.1
     ports:
       - "3000:3000"
     volumes:

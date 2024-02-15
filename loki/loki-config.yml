@@ -35,7 +35,7 @@ storage_config:
   boltdb_shipper:
     active_index_directory: /tmp/loki/boltdb-shipper-active
     cache_location: /tmp/loki/boltdb-shipper-cache
-    cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
+    cache_ttl: 24h        
     shared_store: filesystem
   filesystem:
     directory: /tmp/loki/chunks
@@ -51,6 +51,8 @@ limits_config:
   ingestion_burst_size_mb: 20  
   max_global_streams_per_user: 0  
   max_streams_per_user: 0  
+  split_queries_by_interval: 15m
+  max_query_parallelism: 32
 
 chunk_store_config:
   max_look_back_period: 0s
@@ -70,3 +72,11 @@ ruler:
     kvstore:
       store: inmemory
   enable_api: true
+
+query_scheduler:
+  max_outstanding_requests_per_tenant: 4096
+frontend:
+  max_outstanding_per_tenant: 4096
+query_range:
+  parallelise_shardable_queries: true
+

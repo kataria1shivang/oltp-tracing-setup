@@ -11,7 +11,7 @@ query_frontend:
     duration_slo: 5s
 
 distributor:
-  receivers:                           # this configuration will listen on all ports and protocols that tempo is capable of.
+  receivers:                         
     otlp:
       protocols:
         grpc:
@@ -28,8 +28,8 @@ compactor:
 
 storage:
   trace:
-    backend: local                     # backend configuration to use
+    backend: local                    
     wal:
-      path: /tmp/tempo/wal             # where to store the the wal locally
+      path: /tmp/tempo/wal            
     local:
       path: /tmp/tempo/blocks
