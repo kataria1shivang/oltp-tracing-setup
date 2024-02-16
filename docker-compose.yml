@@ -6,6 +6,7 @@ services:
       - "3101:3101"
     volumes:
       - ./loki/loki-config.yml:/etc/loki/local-config.yaml 
+      - ./loki/alert.rules.yml:/etc/loki/rules
     command: -config.file=/etc/loki/local-config.yaml -config.expand-env=true
     networks:
       - my_network
@@ -36,7 +37,7 @@ services:
       - my_network
 
   alertmanager:
-    image: prom/alertmanager
+    image: prom/alertmanager:v0.22.2 
     volumes:
       - ./alertmanager/config.yml:/etc/alertmanager/config.yml
     ports:

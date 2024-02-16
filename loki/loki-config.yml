@@ -67,7 +67,7 @@ ruler:
     local:
       directory: /tmp/loki/rules
   rule_path: /tmp/loki/rules-temp
-  alertmanager_url: http://localhost:9093
+  alertmanager_url: http://alertmanager:9093  
   ring:
     kvstore:
       store: inmemory
@@ -75,8 +75,9 @@ ruler:
 
 query_scheduler:
   max_outstanding_requests_per_tenant: 4096
+
 frontend:
   max_outstanding_per_tenant: 4096
+
 query_range:
   parallelise_shardable_queries: true
-

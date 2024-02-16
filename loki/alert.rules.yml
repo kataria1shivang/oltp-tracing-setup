@@ -1,0 +1,12 @@
+groups:
+- name: generic_error_alerts
+  rules:
+  - alert: GenericErrorDetected
+    expr: |
+      count_over_time({job=~".*"} |= "Error" [2m]) > 2
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: High error rate detected
+      description: "More than 2 log lines containing 'Error' detected in the last 2 minutes."

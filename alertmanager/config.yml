@@ -2,7 +2,7 @@ global:
   smtp_smarthost: 'smtp.gmail.com:587'
   smtp_from: 'shivang.kataria.in@gmail.com'
   smtp_auth_username: 'shivang.kataria.in@gmail.com'
-  smtp_auth_password: '*********' 
+  smtp_auth_password: 'bypy hist oafy fmpl' 
 
 route:
   group_by: ['alertname']
